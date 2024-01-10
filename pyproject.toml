@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "batch-cancel-cli"
+version = "0.1.0"
+description = ""
+authors = ["Yolley <Yolley@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{ "include" = "cli" }]
+
+[tool.poetry.dependencies]
+python = "^3.11,<3.13"
+anchorpy = { extras = ["cli"], version = "^0.18.0" }
+click = "^8.1.7"
+podite = "^0.1.2"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.8.0"
+ruff = "^0.1.11"
+pyinstaller = "^6.3.0"
+
+[tool.poetry.scripts]
+"batch_cancel_cli" = 'cli.main:main'
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_defs = true
+exclude = ["app/clients/generated"]
+plugins = ["pydantic.mypy", "prisma.mypy"]
+
+[tool.ruff]
+line-length = 120
+select = ["E", "F", "W", "C90", "I", "N", "UP", "ASYNC", "B", "COM", "C4", "PT"]
+ignore = ["COM812"]
+exclude = [".git", "__pycache__", "__init__.py", ".mypy_cache", ".pytest_cache"]
+
+[tool.ruff.isort]
+known-first-party = ["app", "tests"]
+
+[tool.ruff.pep8-naming]
+classmethod-decorators = ["pydantic.field_validator"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

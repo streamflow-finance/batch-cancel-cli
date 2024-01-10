@@ -4,13 +4,15 @@ version = "0.1.0"
 description = ""
 authors = ["Yolley <Yolley@users.noreply.github.com>"]
 readme = "README.md"
-packages = [{ "include" = "cli" }]
+packages = [{ "include" = "batch_cancel_cli" }]
 
 [tool.poetry.dependencies]
-python = "^3.11,<3.13"
-anchorpy = { extras = ["cli"], version = "^0.18.0" }
+python = "^3.11,<3.12"
 click = "^8.1.7"
 podite = "^0.1.2"
+solders = "^0.19.0"
+borsh-construct = "^0.1.0"
+solana = "^0.31.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.8.0"
@@ -18,7 +20,7 @@ ruff = "^0.1.11"
 pyinstaller = "^6.3.0"
 
 [tool.poetry.scripts]
-"batch_cancel_cli" = 'cli.main:main'
+batch_cancel_cli = "batch_cancel_cli.cli:main"
 
 [tool.mypy]
 ignore_missing_imports = true

@@ -3,6 +3,7 @@ from typing import Sequence, overload
 
 import click
 from click import Context
+from more_itertools import chunked
 from solana.rpc.api import Client
 from solana.transaction import Transaction
 from solders.instruction import Instruction
@@ -39,7 +40,7 @@ def validate_pubkey(ctx, param, value: str | tuple[str, ...]) -> Pubkey | tuple[
         return (
             Pubkey.from_string(value.strip())
             if not isinstance(value, tuple)
-            else tuple(Pubkey.from_string(s.strip()) for s in value)
+            else tuple(Pubkey.from_string(s.strip()) for s in value if s.strip())
         )
     except:
         raise click.BadParameter("Invalid pubkey")
@@ -184,9 +185,10 @@ class Runner:
 
     def get_contracts(self, contract_ids: Sequence[Pubkey]) -> list[Contract | None]:
         contracts = []
-        res = self.client.get_multiple_accounts(list(contract_ids))
-        for data in res.value:
-            contracts.append(Contract.from_bytes(data.data) if data else None)
+        for chunk in chunked(contract_ids, 100):
+            res = self.client.get_multiple_accounts(chunk)
+            for data in res.value:
+                contracts.append(Contract.from_bytes(data.data) if data else None)
         return contracts
 
     def create_contract(self, args: CreateArgs, contract_signer: Keypair, mint: Pubkey, recipient: Pubkey) -> Signature:
@@ -285,7 +287,11 @@ def cancel(
         if not contract:
             click.echo(f"Skipping contract {contract_id} as there is no metadata for it")
             continue
-        sig = runner.transfer_cancel(new_recipient, contract_id, contract)
+        try:
+            sig = runner.transfer_cancel(new_recipient, contract_id, contract)
+        except Exception as e:
+            click.echo(f"Failed to cancel contract {contract_id}: {e}")
+            continue
         click.echo(f"Cancel tx for contract {contract_id}: {sig}")
     click.echo("Finished")
 

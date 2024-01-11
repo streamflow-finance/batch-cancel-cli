@@ -1,3 +1,5 @@
+![Streamflow](https://streamflow.finance/assets/streamflow-logo-min.svg) 
+
 # Batch Cancel CLI
 
 A command-line tool to transfer and then cancel multiple contracts. The way it works is:

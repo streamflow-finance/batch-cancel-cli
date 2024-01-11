@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Sequence, overload
 
 import click
-import solders
 from click import Context
 from solana.rpc.api import Client
 from solana.transaction import Transaction
@@ -38,7 +37,9 @@ def validate_pubkey(ctx, param, value: tuple[str, ...]) -> tuple[Pubkey, ...]:
 def validate_pubkey(ctx, param, value: str | tuple[str, ...]) -> Pubkey | tuple[Pubkey, ...]:
     try:
         return (
-            Pubkey.from_string(value) if not isinstance(value, tuple) else tuple(Pubkey.from_string(s) for s in value)
+            Pubkey.from_string(value.strip())
+            if not isinstance(value, tuple)
+            else tuple(Pubkey.from_string(s.strip()) for s in value)
         )
     except:
         raise click.BadParameter("Invalid pubkey")

@@ -9,7 +9,9 @@ A command-line tool to transfer and then cancel multiple contracts. The way it w
 ## Run using pre-built binary
 - You can use a pre-built binary (with pyinstaller) from `dist` directory like so
   ```./dist/batch_cancel_cli -h```
+  This command will show available commands and options for the configuration
 - Works the same as with poetry bit without a need to install dependencies
+- To launch on windows use `PowerShell`, to launch on Mac OS use `Terminal`
 
 ## Run using poetry
 - Requires [poetry](https://python-poetry.org/docs/#installation) and python 3.11+ to be installed on your machine

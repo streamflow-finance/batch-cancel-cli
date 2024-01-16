@@ -36,7 +36,7 @@ GmW9XSD33jKeM1PWLuBbpZYYkNmdHMz4jkS5FHyVUiGi \
 -r wdrwhnCv4pzW8beKsbPa4S2UDZrXenjg16KJdKSpb5u
 ```
 
-- This command will transfer 4 Contracts in total to `wdrwhnCv4pzW8beKsbPa4S2UDZrXenjg16KJdKSpb5u` and then cancel them on Devnet, will use a custom RPC url and private key located at `signer.json` (default value)
+- This command will transfer 2 Contracts in total to `wdrwhnCv4pzW8beKsbPa4S2UDZrXenjg16KJdKSpb5u` and then cancel them on Devnet, will use a custom RPC url and private key located at `signer.json` (default value)
 ```
 ./dist/batch_cancel_cli \
 --devnet \
@@ -45,4 +45,16 @@ cancel \
 9k5FjrUEnVBvjmjU7EfxZQCwgTeSirSgFu1ZexaduPCk \
 GmW9XSD33jKeM1PWLuBbpZYYkNmdHMz4jkS5FHyVUiGi \
 -r wdrwhnCv4pzW8beKsbPa4S2UDZrXenjg16KJdKSpb5u
+```
+
+- This command will cancel 2 Contracts in total and will check whether either of these contracts have been claimed previously before transferring/cancelling:
+```
+./dist/batch_cancel_cli \
+--devnet \
+--rpc https://rpc.ankr.com/solana_devnet \
+cancel \
+9k5FjrUEnVBvjmjU7EfxZQCwgTeSirSgFu1ZexaduPCk \
+GmW9XSD33jKeM1PWLuBbpZYYkNmdHMz4jkS5FHyVUiGi \
+-r wdrwhnCv4pzW8beKsbPa4S2UDZrXenjg16KJdKSpb5u \
+--check-claims
 ```

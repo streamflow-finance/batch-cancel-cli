@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Sequence, overload
+from typing import Callable, Sequence, overload
 
 import click
 from click import Context
@@ -183,12 +183,21 @@ class Runner:
         res = self.client.get_account_info(contract_id)
         return Contract.from_bytes(res.value.data)
 
-    def get_contracts(self, contract_ids: Sequence[Pubkey]) -> list[Contract | None]:
+    def get_contracts(
+        self, contract_ids: Sequence[Pubkey], filter_: Callable[[Contract], bool] | None = None
+    ) -> list[Contract | None]:
         contracts = []
         for chunk in chunked(contract_ids, 100):
             res = self.client.get_multiple_accounts(chunk)
             for data in res.value:
-                contracts.append(Contract.from_bytes(data.data) if data else None)
+                if (
+                    not data
+                    or (contract := Contract.from_bytes(data.data))
+                    and ((filter_ and not filter_(contract)) or contract.closed)
+                ):
+                    contracts.append(None)
+                    continue
+                contracts.append(contract)
         return contracts
 
     def create_contract(self, args: CreateArgs, contract_signer: Keypair, mint: Pubkey, recipient: Pubkey) -> Signature:
@@ -274,18 +283,32 @@ def create(
     callback=validate_pubkey,
 )
 @click.option("-r", "--new-recipient", callback=validate_pubkey, help="Address for the new recipient")
+@click.option(
+    "--check-claims",
+    help="Cancel only contracts that have NOT been claimed",
+    is_flag=True,
+)
 @click.pass_context
 def cancel(
     ctx: Context,
     contract_ids: tuple[Pubkey],
     new_recipient: Pubkey,
+    check_claims: bool,
 ):
+    if check_claims:
+        click.echo("Cancelling only contracts without claims")
+    else:
+        click.echo("Cancelling all provided contracts")
+
+    def claim_filter(c: Contract) -> bool:
+        return not c.last_withdrawn
+
     runner: Runner = ctx.obj["runner"]
-    contracts = runner.get_contracts(contract_ids)
+    contracts = runner.get_contracts(contract_ids, claim_filter if check_claims else None)
     click.echo(f"Processing {len(contracts)} contracts")
     for contract_id, contract in zip(contract_ids, contracts, strict=True):
         if not contract:
-            click.echo(f"Skipping contract {contract_id} as there is no metadata for it")
+            click.echo(f"Skipping contract {contract_id}")
             continue
         try:
             sig = runner.transfer_cancel(new_recipient, contract_id, contract)
